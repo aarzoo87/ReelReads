@@ -1,13 +1,4 @@
-import {
-  Box,
-  Container,
-  Group,
-  ActionIcon,
-  Text,
-  Avatar,
-  Menu,
-  rem,
-} from "@mantine/core";
+import { Box, Container, Group, ActionIcon, Text, rem } from "@mantine/core";
 import { IconBell, IconSun, IconMoon } from "@tabler/icons-react";
 import { useMantineColorScheme } from "@mantine/core";
 import { Link } from "react-router-dom";

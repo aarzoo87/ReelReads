@@ -3,7 +3,6 @@ import { useDisclosure } from "@mantine/hooks";
 import axios from "axios";
 import {
   Container,
-  Grid,
   MultiSelect,
   Group,
   Select,
@@ -12,7 +11,6 @@ import {
   Radio,
   Card,
   Divider,
-  Flex,
   TextInput,
   Modal,
   Button,
@@ -22,13 +20,8 @@ import {
   Stack,
   Box,
 } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
 import HeaderMenu from "./HeaderMenu";
-import {
-  IconChevronDown,
-  IconHeart,
-  IconHeartFilled,
-} from "@tabler/icons-react";
+import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 
 function Home() {
   const [selectedFilters, setSelectedFilters] = useState([]);
@@ -43,6 +36,7 @@ function Home() {
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [movieOpened, { open: openMovieModal, close: closeMovieModal }] =
     useDisclosure(false);
+  const [searchMovieText, setSearchMovieText] = useState("");
 
   const genreOptions = [
     { label: "Action", value: "action" },
@@ -99,6 +93,10 @@ function Home() {
     console.log(movieDetail);
     setSelectedMovie(movieDetail);
     openMovieModal();
+  };
+
+  const handleSeachMovies = (value) => {
+    setSearchMovieText(value);
   };
 
   useEffect(() => {
@@ -291,12 +289,23 @@ function Home() {
                 onChange={setSelectedType}
                 w={120}
               />
-              <TextInput placeholder="Search movies..." w={250} />
+              <TextInput
+                placeholder="Search movies..."
+                value={searchMovieText}
+                onChange={handleSeachMovies}
+                w={250}
+              />
             </Group>
           </Group>
 
           <Divider my="md" />
 
+          {/*          <Radio.Group name="search_type">
+            <Group mt="xs">
+              <Radio value="movies" label="Movies" defaultChecked />
+              <Radio value="books" label="Books" />
+            </Group>
+          </Radio.Group>*/}
           <Title order={3}>Movies List</Title>
           {moviesList?.map((movie) => (
             <Card shadow="md" padding="lg" radius="md" withBorder mb="md">
