@@ -19,9 +19,16 @@ import {
   Badge,
   Stack,
   Box,
+  Table,
+  Grid,
+  Anchor,
 } from "@mantine/core";
 import HeaderMenu from "./HeaderMenu";
-import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
+import {
+  IconHeart,
+  IconHeartFilled,
+  IconInfoCircle,
+} from "@tabler/icons-react";
 
 function Home() {
   const [selectedFilters, setSelectedFilters] = useState([]);
@@ -37,6 +44,7 @@ function Home() {
   const [movieOpened, { open: openMovieModal, close: closeMovieModal }] =
     useDisclosure(false);
   const [searchMovieText, setSearchMovieText] = useState("");
+  const [originalMovieList, setOriginalMovieList] = useState([]);
 
   const genreOptions = [
     { label: "Action", value: "action" },
@@ -96,22 +104,36 @@ function Home() {
   };
 
   const handleSeachMovies = (value) => {
-    setSearchMovieText(value);
+    setSearchMovieText(value.currentTarget.value);
+    let searchableMovieList = originalMovieList.filter((movie) =>
+      movie.title
+        .toLowerCase()
+        .includes(value.currentTarget.value.toLowerCase()),
+    );
+    setMoviesList(searchableMovieList);
   };
+
+  const headers = [
+    "Preview",
+    "Title",
+    "Vote Average",
+    "Release Date",
+    "Action",
+  ];
 
   useEffect(() => {
     axios
       .get(`https://api.themoviedb.org/3/discover/movie`, {
         params: {
           api_key: "1263df9fc79b5bbd8d55997b833c061e",
-          region: "IN", // for India
+          region: "IN",
           sort_by: "popularity.desc",
-          with_original_language: "hi", // Hindi
+          with_original_language: "hi",
         },
       })
       .then((res) => {
-        console.log(res.data.results);
         setMoviesList(res.data.results);
+        setOriginalMovieList(res.data.results);
       })
       .catch((err) => console.error(err));
   }, []);
@@ -307,61 +329,171 @@ function Home() {
             </Group>
           </Radio.Group>*/}
           <Title order={3}>Movies List</Title>
-          {moviesList?.map((movie) => (
-            <Card shadow="md" padding="lg" radius="md" withBorder mb="md">
-              <Group noWrap spacing="md">
-                <Box style={{ width: 180 }}>
-                  <Image
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                    alt={movie.title}
-                    radius="md"
-                    height={180}
-                  />
-                </Box>
+          {selectedType === "grid" &&
+            moviesList?.map((movie) => (
+              <Card shadow="md" padding="lg" radius="md" withBorder mb="md">
+                <Group noWrap spacing="md">
+                  <Box style={{ width: 180 }}>
+                    <Image
+                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                      alt={movie.title}
+                      radius="md"
+                      height={180}
+                    />
+                  </Box>
 
-                <Stack spacing="xs" align="stretch" style={{ flex: 1 }}>
-                  <Group justify="space-between" align="center" w="100%">
-                    <Group gap="sm">
-                      <Text fw={700} fz="lg">
-                        {movie.title}
-                      </Text>
-                      <Badge color="blue" variant="light">
-                        ⭐ {movie.vote_average}
-                      </Badge>
+                  <Stack spacing="xs" align="stretch" style={{ flex: 1 }}>
+                    <Group justify="space-between" align="center" w="100%">
+                      <Group gap="sm">
+                        <Text fw={700} fz="lg">
+                          {movie.title}
+                        </Text>
+                        <Badge color="blue" variant="light">
+                          ⭐ {movie.vote_average}
+                        </Badge>
+                      </Group>
+
+                      <Button
+                        leftSection={true ? <IconHeartFilled /> : <IconHeart />}
+                        variant={true ? "light" : "outline"}
+                        size="xs"
+                        compact
+                        // onClick={() => toggleFavorite(movie)}
+                      >
+                        {true ? "Favorited" : "Add to Favorites"}
+                      </Button>
                     </Group>
 
+                    <Text size="sm" color="dimmed" lineClamp={3}>
+                      {movie.overview}
+                    </Text>
+
+                    <Text size="xs" color="gray">
+                      Release Date: {movie.release_date}
+                    </Text>
+
                     <Button
-                      leftSection={true ? <IconHeartFilled /> : <IconHeart />}
-                      variant={true ? "light" : "outline"}
+                      variant="light"
+                      mt="xs"
                       size="xs"
-                      compact
-                      // onClick={() => toggleFavorite(movie)}
+                      color="orange"
+                      onClick={() => handleViewMovie(movie)}
                     >
-                      {true ? "Favorited" : "Add to Favorites"}
+                      View Details
                     </Button>
-                  </Group>
+                  </Stack>
+                </Group>
+              </Card>
+            ))}
 
-                  <Text size="sm" color="dimmed" lineClamp={3}>
-                    {movie.overview}
-                  </Text>
-
-                  <Text size="xs" color="gray">
-                    Release Date: {movie.release_date}
-                  </Text>
-
-                  <Button
-                    variant="light"
-                    mt="xs"
-                    size="xs"
-                    color="orange"
-                    onClick={() => handleViewMovie(movie)}
+          {selectedType === "list" && (
+            <Box w="100%" style={{ minWidth: 1100 }}>
+              {/* Header Row */}
+              <Group gap="sm" wrap="nowrap" px="sm" py="xs" bg="gray.1">
+                {headers.map((header) => (
+                  <Box
+                    key={header}
+                    w={header.includes("Title") ? "25%" : "14%"}
                   >
-                    View Details
-                  </Button>
-                </Stack>
+                    <Text
+                      size="sm"
+                      fw={600}
+                      tt="uppercase"
+                      c="gray.7"
+                      ta="center"
+                    >
+                      {header}
+                    </Text>
+                  </Box>
+                ))}
               </Group>
-            </Card>
-          ))}
+
+              <Divider />
+
+              {/* Data Rows */}
+              <ScrollArea h={500} type="auto">
+                <Stack spacing={0}>
+                  {moviesList?.map((movie, i) => (
+                    <Box key={i} bg={i % 2 === 0 ? "white" : "gray.0"}>
+                      <Group
+                        gap="sm"
+                        wrap="nowrap"
+                        px="sm"
+                        py={10}
+                        align="center"
+                      >
+                        <Box w="14%">
+                          <Anchor
+                            href={`https://image.tmdb.org/t/p/w500${movie.backdrop_path}`}
+                            target="_blank"
+                            size="sm"
+                            c="blue"
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
+                          >
+                            Preview
+                          </Anchor>
+                        </Box>
+                        <Box w="25%">
+                          <Text size="sm" truncate fw={600} ta="center">
+                            {movie.title}
+                          </Text>
+                        </Box>
+                        <Box
+                          w="14%"
+                          style={{ display: "flex", justifyContent: "center" }}
+                        >
+                          <Badge
+                            color="blue"
+                            variant="light"
+                            size="lg"
+                            mx="auto"
+                          >
+                            ⭐ {movie.vote_average}
+                          </Badge>
+                        </Box>
+                        <Box w="14%">
+                          <Text size="sm" ta="center">
+                            {movie.release_date}
+                          </Text>
+                        </Box>
+                        <Box w="25%">
+                          <Group gap="xs" justify="start">
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              onClick={() => handleViewMovie(movie)}
+                            >
+                              View Details
+                            </Button>
+
+                            <Button
+                              leftSection={
+                                false ? (
+                                  <IconHeartFilled size={14} />
+                                ) : (
+                                  <IconHeart size={14} />
+                                )
+                              }
+                              variant={false ? "light" : "outline"}
+                              size="xs"
+                              compact
+                              // onClick={() => toggleFavorite(movie)}
+                            >
+                              {true ? "Favorited" : "Add to Favorites"}
+                            </Button>
+                          </Group>
+                        </Box>
+                      </Group>
+                      <Divider />
+                    </Box>
+                  ))}
+                </Stack>
+              </ScrollArea>
+            </Box>
+          )}
         </Container>
       </Card>
     </>
