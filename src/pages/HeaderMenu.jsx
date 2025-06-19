@@ -25,7 +25,11 @@ function HeaderMenu() {
         <Group justify="space-between" align="center" wrap="nowrap">
           {/* Left Side - Logo + Nav */}
           <Group gap="md" align="center" wrap="nowrap">
-            <img src="/logo192.png" alt="Logo" style={{ height: rem(30) }} />
+            <img
+              src="/reelreads_logo.png"
+              alt="Logo"
+              style={{ height: rem(40) }}
+            />
             <Group gap="sm" wrap="nowrap">
               {["Dashboard", "Favorites", "Categories", "Recent", "About"].map(
                 (item) => (

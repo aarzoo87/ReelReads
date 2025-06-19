@@ -45,6 +45,8 @@ function Home() {
     useDisclosure(false);
   const [searchMovieText, setSearchMovieText] = useState("");
   const [originalMovieList, setOriginalMovieList] = useState([]);
+  const [recentWatchList, setRecentWatchList] = useState([]);
+  const [favoriteMovieList, setFavoriteMovieList] = useState([]);
 
   const genreOptions = [
     { label: "Action", value: "action" },
@@ -98,10 +100,28 @@ function Home() {
   };
 
   const handleViewMovie = (movieDetail) => {
-    console.log(movieDetail);
+    setRecentWatchList((prev) => [...prev, movieDetail]);
     setSelectedMovie(movieDetail);
     openMovieModal();
   };
+
+  useEffect(() => {
+    if (recentWatchList.length > 0) {
+      const storedList = localStorage.getItem("movieList");
+      const parsedStoredList = storedList ? JSON.parse(storedList) : [];
+      const mergedList = [...parsedStoredList];
+      recentWatchList.forEach((newMovie) => {
+        const alreadyExists = mergedList.find(
+          (movie) => movie.id === newMovie.id,
+        );
+        if (!alreadyExists) {
+          mergedList.unshift(newMovie);
+        }
+      });
+
+      localStorage.setItem("movieList", JSON.stringify(mergedList));
+    }
+  }, [recentWatchList]);
 
   const handleSeachMovies = (value) => {
     setSearchMovieText(value.currentTarget.value);
@@ -111,6 +131,21 @@ function Home() {
         .includes(value.currentTarget.value.toLowerCase()),
     );
     setMoviesList(searchableMovieList);
+  };
+
+  const toggleFavorite = (newMovie) => {
+    const storedList = localStorage.getItem("favoriteMovieList");
+    const parsedStoredList = storedList ? JSON.parse(storedList) : [];
+    const mergedList = [...parsedStoredList];
+    const alreadyMovieExists = mergedList.find(
+      (movie) => movie.id === newMovie.id,
+    );
+    if (!alreadyMovieExists) {
+      mergedList.push(newMovie);
+    }
+    console.log("mergedList", mergedList);
+    setFavoriteMovieList(mergedList);
+    localStorage.setItem("favoriteMovieList", JSON.stringify(mergedList));
   };
 
   const headers = [
@@ -136,6 +171,9 @@ function Home() {
         setOriginalMovieList(res.data.results);
       })
       .catch((err) => console.error(err));
+    const storedList = localStorage.getItem("favoriteMovieList");
+    const parsedStoredList = storedList ? JSON.parse(storedList) : [];
+    setFavoriteMovieList(parsedStoredList);
   }, []);
 
   return (
@@ -319,16 +357,10 @@ function Home() {
               />
             </Group>
           </Group>
-
           <Divider my="md" />
-
-          {/*          <Radio.Group name="search_type">
-            <Group mt="xs">
-              <Radio value="movies" label="Movies" defaultChecked />
-              <Radio value="books" label="Books" />
-            </Group>
-          </Radio.Group>*/}
-          <Title order={3}>Movies List</Title>
+          <Title order={3} mb={15}>
+            🎬 Movie Spotlight
+          </Title>
           {selectedType === "grid" &&
             moviesList?.map((movie) => (
               <Card shadow="md" padding="lg" radius="md" withBorder mb="md">
@@ -354,13 +386,27 @@ function Home() {
                       </Group>
 
                       <Button
-                        leftSection={true ? <IconHeartFilled /> : <IconHeart />}
-                        variant={true ? "light" : "outline"}
+                        leftSection={
+                          favoriteMovieList.some(
+                            (fav) => fav.id === movie.id,
+                          ) ? (
+                            <IconHeartFilled />
+                          ) : (
+                            <IconHeart />
+                          )
+                        }
+                        variant={
+                          favoriteMovieList.some((fav) => fav.id === movie.id)
+                            ? "light"
+                            : "outline"
+                        }
                         size="xs"
                         compact
-                        // onClick={() => toggleFavorite(movie)}
+                        onClick={() => toggleFavorite(movie)}
                       >
-                        {true ? "Favorited" : "Add to Favorites"}
+                        {favoriteMovieList.some((fav) => fav.id === movie.id)
+                          ? "Favorited"
+                          : "Add to Favorites"}
                       </Button>
                     </Group>
 
