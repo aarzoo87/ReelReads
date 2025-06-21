@@ -1,76 +1,70 @@
-import { Box, Container, Group, ActionIcon, Text, rem } from "@mantine/core";
-import { IconBell, IconSun, IconMoon } from "@tabler/icons-react";
+import { Box, Container, Group, ActionIcon, rem, Button } from "@mantine/core";
+import { IconSun, IconMoon } from "@tabler/icons-react";
 import { useMantineColorScheme } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function HeaderMenu() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const location = useLocation();
+
+  const navItems = [
+    { label: "Dashboard", path: "/" },
+    { label: "Favorites", path: "/favorites" },
+    { label: "Collections", path: "/collections" },
+    { label: "Recent", path: "/recent" },
+    { label: "About", path: "/about" },
+  ];
 
   return (
     <Box
       sx={(theme) => ({
         backgroundColor:
           theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
-        height: rem(60),
-        display: "flex",
-        alignItems: "center",
         borderBottom: `1px solid ${
           theme.colorScheme === "dark"
             ? theme.colors.dark[4]
-            : theme.colors.gray[3]
+            : theme.colors.gray[2]
         }`,
+        boxShadow: theme.shadows.xs,
       })}
     >
-      <Container size="xl" px="md" style={{ width: "100%" }}>
+      <Container size="xl" px="md" py="xs">
         <Group justify="space-between" align="center" wrap="nowrap">
-          {/* Left Side - Logo + Nav */}
-          <Group gap="md" align="center" wrap="nowrap">
+          {/* Left Side */}
+          <Group gap="lg" align="center" wrap="nowrap">
             <img
               src="/reelreads_logo.png"
-              alt="Logo"
-              style={{ height: rem(40) }}
+              alt="ReelReads Logo"
+              style={{ height: rem(36), borderRadius: rem(6) }}
             />
-            <Group gap="sm" wrap="nowrap">
-              {["Dashboard", "Favorites", "Categories", "Recent", "About"].map(
-                (item) => (
-                  <Text
-                    key={item}
-                    component={Link}
-                    to={`/${item.toLowerCase() === "dashboard" ? "" : item.toLowerCase()}`}
-                    fw={500}
-                    size="sm"
-                    sx={(theme) => ({
-                      color:
-                        theme.colorScheme === "dark"
-                          ? theme.colors.gray[0]
-                          : theme.colors.dark[6],
-                      textDecoration: "none",
-                      "&:hover": {
-                        color:
-                          theme.colorScheme === "dark"
-                            ? theme.white
-                            : theme.black,
-                      },
-                    })}
-                  >
-                    {item}
-                  </Text>
-                ),
-              )}
+
+            <Group gap="xs" wrap="nowrap">
+              {navItems.map((item) => (
+                <Button
+                  key={item.label}
+                  component={Link}
+                  to={item.path}
+                  variant={
+                    location.pathname === item.path ? "filled" : "subtle"
+                  }
+                  color="blue"
+                  size="sm"
+                  radius="xl"
+                >
+                  {item.label}
+                </Button>
+              ))}
             </Group>
           </Group>
 
           {/* Right Side - Icons */}
-          <Group gap="xs" align="center" wrap="nowrap">
-            <ActionIcon variant="default" size="lg">
-              <IconBell size={18} />
-            </ActionIcon>
-
+          <Group gap="xs">
             <ActionIcon
-              variant="default"
+              variant="light"
               size="lg"
               onClick={toggleColorScheme}
               title="Toggle color scheme"
+              color="blue"
             >
               {colorScheme === "dark" ? (
                 <IconSun size={18} />

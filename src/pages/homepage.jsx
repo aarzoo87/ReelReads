@@ -62,15 +62,9 @@ function Home() {
   ];
 
   const timeRangeOptions = [
-    { label: "All Time", value: "-1" },
-    { label: "Today", value: "1" },
-    { label: "Yesterday", value: "2" },
-    { label: "Last 7 days", value: "3" },
-    { label: "This Month", value: "4" },
-    { label: "Last Month", value: "5" },
-    { label: "This Year", value: "6" },
-    { label: "Last Year", value: "7" },
-    { label: "Custom Range", value: "8" },
+    { label: "Less than 90 minutes", value: "1" },
+    { label: "Less than 120 minutes (2 hours)", value: "2" },
+    { label: "More than 120 minutes", value: "3" },
   ];
 
   const handleSelectedLanguage = (value) => {
@@ -137,7 +131,6 @@ function Home() {
     if (!alreadyMovieExists) {
       mergedList.push(newMovie);
     }
-    console.log("mergedList", mergedList);
     setFavoriteMovieList(mergedList);
     localStorage.setItem("favoriteMovieList", JSON.stringify(mergedList));
   };
@@ -150,7 +143,86 @@ function Home() {
     "Action",
   ];
 
-  useEffect(() => {
+  const handleClearFilter = () => {
+    setSelectedLanguage("");
+    setSelectedGenre("");
+    setSelecteAdultContent("yes");
+    setSelectedRating("");
+    setSelectedTime("");
+    setSelectedFilters([]);
+    fetchMovieList();
+    close();
+  };
+
+  const handleSelectedFilter = async () => {
+    const genreMap = {
+      action: 28,
+      comedy: 35,
+      drama: 18,
+      romance: 10749,
+      thriller: 53,
+      horror: 27,
+      mystery: 9648,
+      documentary: 99,
+    };
+
+    const params = {
+      api_key: "1263df9fc79b5bbd8d55997b833c061e",
+      with_original_language: selectedLanguage || "hi",
+      include_adult: selectedAdultContent === "yes",
+      vote_average_gte: selectedRating || 0,
+      with_genres: genreMap[selectedGenre?.toLowerCase()] || "",
+      sort_by: "popularity.desc",
+    };
+
+    try {
+      const res = await axios.get(
+        "https://api.themoviedb.org/3/discover/movie",
+        {
+          params,
+        },
+      );
+
+      let moviesList = res.data.results;
+
+      // Runtime filtering
+      if (selectedTime) {
+        const movieDetails = await Promise.all(
+          moviesList.map(async (movie) => {
+            try {
+              const detailRes = await axios.get(
+                `https://api.themoviedb.org/3/movie/${movie.id}`,
+                { params: { api_key: "1263df9fc79b5bbd8d55997b833c061e" } },
+              );
+              const runtime = detailRes.data.runtime;
+
+              if (
+                (selectedTime === "1" && runtime < 90) ||
+                (selectedTime === "2" && runtime < 120) ||
+                (selectedTime === "3" && runtime >= 120)
+              ) {
+                return movie;
+              }
+              return null;
+            } catch (err) {
+              console.error(err);
+              return null;
+            }
+          }),
+        );
+
+        moviesList = movieDetails.filter((m) => m !== null);
+      }
+
+      setMoviesList(moviesList);
+      setOriginalMovieList(moviesList);
+    } catch (error) {
+      console.error(error);
+    }
+    close();
+  };
+
+  const fetchMovieList = () => {
     axios
       .get(`https://api.themoviedb.org/3/discover/movie`, {
         params: {
@@ -165,6 +237,10 @@ function Home() {
         setOriginalMovieList(res.data.results);
       })
       .catch((err) => console.error(err));
+  };
+
+  useEffect(() => {
+    fetchMovieList();
     const storedList = localStorage.getItem("favoriteMovieList");
     const parsedStoredList = storedList ? JSON.parse(storedList) : [];
     setFavoriteMovieList(parsedStoredList);
@@ -280,7 +356,10 @@ function Home() {
           <Button variant="default" onClick={close}>
             Close
           </Button>
-          <Button>Apply</Button>
+          <Button onClick={handleSelectedFilter}>Apply</Button>
+          <Button onClick={handleClearFilter} color="orange">
+            Clear
+          </Button>
         </Group>
       </Modal>
       <Modal
@@ -307,7 +386,10 @@ function Home() {
             </Text>
             <Text size="xs" mt="sm">
               Original Language:{" "}
-              {selectedMovie.original_language === "hi" ? "Hindi" : "Hindi"}
+              {selectedMovie.original_language === "hi" && "Hindi"}
+              {selectedMovie.original_language === "en" && "English"}
+              {selectedMovie.original_language === "gu" && "Gujarati"}
+              {selectedMovie.original_language === "ta" && "Tamil"}
             </Text>
             <Text size="xs" mt="sm">
               ⭐ {selectedMovie.vote_average} | Released:{" "}
