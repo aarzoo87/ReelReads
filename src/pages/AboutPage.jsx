@@ -14,7 +14,7 @@ import {
   Anchor,
   Badge,
 } from "@mantine/core";
-import { IconCheck, IconBrandGithub } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
 import HeaderMenu from "./HeaderMenu";
 
 const About = () => {

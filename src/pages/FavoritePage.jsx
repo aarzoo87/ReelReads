@@ -1,38 +1,22 @@
 import { useState, useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import axios from "axios";
 import {
   Container,
-  MultiSelect,
   Group,
-  Select,
   Text,
   Title,
-  Radio,
   Card,
-  Divider,
-  TextInput,
   Modal,
   Button,
-  ScrollArea,
   Image,
   Badge,
   Stack,
   Box,
-  Table,
-  Grid,
-  Anchor,
 } from "@mantine/core";
 import HeaderMenu from "./HeaderMenu";
-import {
-  IconHeart,
-  IconHeartFilled,
-  IconInfoCircle,
-} from "@tabler/icons-react";
 
 function Home() {
   const [moviesList, setMoviesList] = useState([]);
-  const [opened, { open, close }] = useDisclosure(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [movieOpened, { open: openMovieModal, close: closeMovieModal }] =
     useDisclosure(false);

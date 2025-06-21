@@ -19,16 +19,10 @@ import {
   Badge,
   Stack,
   Box,
-  Table,
-  Grid,
   Anchor,
 } from "@mantine/core";
 import HeaderMenu from "./HeaderMenu";
-import {
-  IconHeart,
-  IconHeartFilled,
-  IconInfoCircle,
-} from "@tabler/icons-react";
+import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 
 function Home() {
   const [selectedFilters, setSelectedFilters] = useState([]);
