@@ -31,7 +31,7 @@ function Collection() {
 
   useEffect(() => {
     const params = {
-      api_key: "1263df9fc79b5bbd8d55997b833c061e",
+      api_key: process.env.REACT_APP_TMDB_KEY,
       with_original_language: "hi",
     };
 

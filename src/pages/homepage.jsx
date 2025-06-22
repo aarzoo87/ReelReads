@@ -167,7 +167,7 @@ function Home() {
     };
 
     const params = {
-      api_key: "1263df9fc79b5bbd8d55997b833c061e",
+      api_key: process.env.REACT_APP_TMDB_KEY,
       with_original_language: selectedLanguage || "hi",
       include_adult: selectedAdultContent === "yes",
       vote_average_gte: selectedRating || 0,
@@ -192,7 +192,7 @@ function Home() {
             try {
               const detailRes = await axios.get(
                 `https://api.themoviedb.org/3/movie/${movie.id}`,
-                { params: { api_key: "1263df9fc79b5bbd8d55997b833c061e" } },
+                { params: { api_key: process.env.REACT_APP_TMDB_KEY } },
               );
               const runtime = detailRes.data.runtime;
 
@@ -226,7 +226,7 @@ function Home() {
     axios
       .get(`https://api.themoviedb.org/3/discover/movie`, {
         params: {
-          api_key: "1263df9fc79b5bbd8d55997b833c061e",
+          api_key: process.env.REACT_APP_TMDB_KEY,
           region: "IN",
           sort_by: "popularity.desc",
           with_original_language: "hi",
@@ -236,7 +236,10 @@ function Home() {
         setMoviesList(res.data.results);
         setOriginalMovieList(res.data.results);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        alert("Failed to fetch movies. Please try again later.");
+      });
   };
 
   useEffect(() => {
@@ -414,16 +417,18 @@ function Home() {
       <Card shadow="md" radius="md" p="lg" withBorder mb="xl">
         <Container size="xl" py="lg">
           <Group position="apart" mb="md">
-            <Button onClick={open}>Add Filter</Button>
+            <Button onClick={open}>
+              {selectedFilters.length > 0 ? "Update Filter" : "Add Filter"}
+            </Button>
             <Group>
               <Select
                 data={[
-                  { label: "Grid", value: "grid" },
-                  { label: "List", value: "list" },
+                  { label: "Block View", value: "grid" },
+                  { label: "Stacked View", value: "list" },
                 ]}
                 value={selectedType}
                 onChange={setSelectedType}
-                w={120}
+                w={150}
               />
               <TextInput
                 placeholder="Search movies..."
@@ -593,18 +598,30 @@ function Home() {
 
                             <Button
                               leftSection={
-                                false ? (
-                                  <IconHeartFilled size={14} />
+                                favoriteMovieList.some(
+                                  (fav) => fav.id === movie.id,
+                                ) ? (
+                                  <IconHeartFilled />
                                 ) : (
-                                  <IconHeart size={14} />
+                                  <IconHeart />
                                 )
                               }
-                              variant={false ? "light" : "outline"}
+                              variant={
+                                favoriteMovieList.some(
+                                  (fav) => fav.id === movie.id,
+                                )
+                                  ? "light"
+                                  : "outline"
+                              }
                               size="xs"
                               compact
-                              // onClick={() => toggleFavorite(movie)}
+                              onClick={() => toggleFavorite(movie)}
                             >
-                              {true ? "Favorited" : "Add to Favorites"}
+                              {favoriteMovieList.some(
+                                (fav) => fav.id === movie.id,
+                              )
+                                ? "Favorited"
+                                : "Add to Favorites"}
                             </Button>
                           </Group>
                         </Box>

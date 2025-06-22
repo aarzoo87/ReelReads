@@ -38,7 +38,7 @@ const About = () => {
             {/* Title & Description */}
             <Box>
               <Title order={2} align="center" mb="sm">
-                About Movie & Book Finder
+                About Movie Finder
               </Title>
               <Text align="center" size="md">
                 A simple app to help you search, explore, and keep track of your
